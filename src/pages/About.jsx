@@ -69,7 +69,7 @@ const About = () => {
         >
           <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-10 shadow-2xl border border-white/10 hover:scale-105 transition-transform duration-500">
             <h3 className="text-3xl font-semibold mb-4 text-green-400">
-              Our Vision
+              Our Mission
             </h3>
             <p className="text-gray-300 leading-relaxed text-lg">
               Deliver 5 million tonnes of verified CO₂ removals annually by
