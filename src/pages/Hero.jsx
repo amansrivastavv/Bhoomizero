@@ -1,6 +1,8 @@
 "use client"; 
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
+import CountUp from "react-countup";
+import { useInView } from "react-intersection-observer";
 
 export default function MeshBackground() {
   const [displayedText, setDisplayedText] = useState("");
@@ -31,12 +33,18 @@ export default function MeshBackground() {
     mouseY.set(e.clientY);
   };
 
+  // Scroll trigger for stats
+  const { ref: statsRef, inView: statsInView } = useInView({
+    triggerOnce: true,
+    threshold: 0.3,
+  });
+
   return (
     <div
       className="relative h-screen w-full overflow-hidden bg-black text-white"
       onMouseMove={handleMouseMove}
     >
-      {/*  Ambient Blobs */}
+      {/* Ambient Blobs */}
       <motion.div
         className="absolute w-[400px] h-[400px] rounded-full bg-green-500 opacity-20 blur-2xl"
         style={{ x: blobX1, y: blobY1 }}
@@ -83,17 +91,28 @@ export default function MeshBackground() {
           carbon removal technologies.
         </motion.p>
 
-        <div className="flex gap-6 mt-8 flex-wrap justify-center">
+        {/* Stats Section with Counting */}
+        <div
+          ref={statsRef}
+          className="flex gap-6 mt-8 flex-wrap justify-center"
+        >
           <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-green-400">50K+</p>
+            <p className="text-2xl md:text-3xl font-bold text-green-400">
+              {statsInView ? <CountUp end={50000} duration={2} separator="," /> : "0"}
+              +
+            </p>
             <p className="text-gray-300 text-sm md:text-base">Tons CO₂ Removed</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-green-400">20+</p>
+            <p className="text-2xl md:text-3xl font-bold text-green-400">
+              {statsInView ? <CountUp end={20} duration={2} /> : "0"}+
+            </p>
             <p className="text-gray-300 text-sm md:text-base">Projects Globally</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-green-400">100%</p>
+            <p className="text-2xl md:text-3xl font-bold text-green-400">
+              {statsInView ? <CountUp end={100} duration={2} /> : "0"}%
+            </p>
             <p className="text-gray-300 text-sm md:text-base">Science-Backed</p>
           </div>
         </div>
