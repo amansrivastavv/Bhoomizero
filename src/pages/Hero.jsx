@@ -1,23 +1,23 @@
-"use client"; 
-import { motion, useMotionValue, useTransform } from "framer-motion";
+"use client";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import CountUp from "react-countup";
-import { useInView } from "react-intersection-observer";
+import CleanBg from "../assets/CleanEarth.jpg";
+import CleanTechBg from "../assets/cleanTechnology.png";
+import PollutedBg from "../assets/polutedEarth.png";
 
-export default function MeshBackground() {
+const images = [
+  { src: CleanBg, animation: { initial: { opacity: 0, y: 50 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -50 }, transition: { duration: 1, ease: "easeOut" } } },
+  { src: CleanTechBg, animation: { initial: { opacity: 0, x: -50 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: 50 }, transition: { duration: 1.2, ease: "easeIn" } } },
+  { src: PollutedBg, animation: { initial: { opacity: 0, scale: 1.2 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.8 }, transition: { duration: 1.5, ease: "linear" } } }
+];
+
+const MeshBackground = () => {
   const [displayedText, setDisplayedText] = useState("");
   const fullText = "Bhumi Zero-Carbon";
 
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const blobX1 = useTransform(mouseX, [0, window.innerWidth], [-40, 40]);
-  const blobY1 = useTransform(mouseY, [0, window.innerHeight], [-40, 40]);
-  const blobX2 = useTransform(mouseX, [0, window.innerWidth], [40, -40]);
-  const blobY2 = useTransform(mouseY, [0, window.innerHeight], [40, -40]);
-  const blobX3 = useTransform(mouseX, [0, window.innerWidth], [-60, 60]);
-  const blobY3 = useTransform(mouseY, [0, window.innerHeight], [60, -60]);
-
+  // Typing effect
   useEffect(() => {
     let index = 0;
     const interval = setInterval(() => {
@@ -28,44 +28,32 @@ export default function MeshBackground() {
     return () => clearInterval(interval);
   }, [fullText]);
 
-  const handleMouseMove = (e) => {
-    mouseX.set(e.clientX);
-    mouseY.set(e.clientY);
-  };
-
-  // Scroll trigger for stats
-  const { ref: statsRef, inView: statsInView } = useInView({
-    triggerOnce: true,
-    threshold: 0.3,
-  });
+  // Slide show effect (faster)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 4000); // switch every 4 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div
-      className="relative h-screen w-full overflow-hidden bg-black text-white"
-      onMouseMove={handleMouseMove}
-    >
-      {/* Ambient Blobs */}
-      <motion.div
-        className="absolute w-[400px] h-[400px] rounded-full bg-green-500 opacity-20 blur-2xl"
-        style={{ x: blobX1, y: blobY1 }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.div
-        className="absolute w-[300px] h-[300px] rounded-full bg-blue-500 opacity-20 blur-2xl"
-        style={{ x: blobX2, y: blobY2 }}
-        animate={{ rotate: -360 }}
-        transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.div
-        className="absolute w-[500px] h-[500px] rounded-full bg-purple-500 opacity-10 blur-3xl"
-        style={{ x: blobX3, y: blobY3 }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
+    <div className="relative h-screen w-full overflow-hidden bg-black text-white">
+      {/* Background slideshow */}
+      <AnimatePresence>
+        <motion.img
+          key={currentIndex}
+          src={images[currentIndex].src}
+          alt={`Background ${currentIndex}`}
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={images[currentIndex].animation.initial}
+          animate={images[currentIndex].animation.animate}
+          exit={images[currentIndex].animation.exit}
+          transition={images[currentIndex].animation.transition}
+        />
+      </AnimatePresence>
+      <div className="absolute inset-0 bg-black opacity-40 z-5"></div>
+      {/* Foreground Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center backdrop-blur-[2px]">
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
           {displayedText}
           <span className="animate-pulse text-green-400">|</span>
@@ -91,32 +79,6 @@ export default function MeshBackground() {
           carbon removal technologies.
         </motion.p>
 
-        {/* Stats Section with Counting */}
-        <div
-          ref={statsRef}
-          className="flex gap-6 mt-8 flex-wrap justify-center"
-        >
-          <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-green-400">
-              {statsInView ? <CountUp end={50000} duration={2} separator="," /> : "0"}
-              +
-            </p>
-            <p className="text-gray-300 text-sm md:text-base">Tons CO₂ Removed</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-green-400">
-              {statsInView ? <CountUp end={20} duration={2} /> : "0"}+
-            </p>
-            <p className="text-gray-300 text-sm md:text-base">Projects Globally</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-green-400">
-              {statsInView ? <CountUp end={100} duration={2} /> : "0"}%
-            </p>
-            <p className="text-gray-300 text-sm md:text-base">Science-Backed</p>
-          </div>
-        </div>
-
         <motion.div
           className="mt-10 text-green-400 animate-bounce"
           initial={{ opacity: 0 }}
@@ -128,4 +90,6 @@ export default function MeshBackground() {
       </div>
     </div>
   );
-}
+};
+
+export default MeshBackground;
